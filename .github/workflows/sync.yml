@@ -1,0 +1,36 @@
+# Secrets:
+# transifex_apikey = xxx
+
+name: Sync Transifex
+
+on:
+  workflow_dispatch:
+  schedule: [ { cron: 0 20 * * * } ] # 每天 20:00 UTC (04:00 UTC+8) 执行
+
+jobs:
+  main:
+    runs-on: ubuntu-latest
+    defaults: { run: { shell: 'bash --noprofile --norc -eo pipefail {0}' } }
+    steps:
+    - name: git clone
+      uses: actions/checkout@v3
+    - name: download
+      run: |
+        api () { curl -H 'content-type: application/vnd.api+json' -H 'authorization: Bearer ${{ secrets.transifex_apikey }}' -fsS "${@}"; }
+        # request
+        url="$( api -i 'https://rest.api.transifex.com/resource_translations_async_downloads' --data-raw '{"data":{"attributes":{"content_encoding":"text","file_type":"default","mode":"default"},"relationships":{"language":{"data":{"id":"l:zh_CN","type":"languages"}},"resource":{"data":{"id":"o:cataclysm-dda-translators:p:cataclysm-dda:r:master-cataclysm-dda","type":"resources"}}},"type":"resource_translations_async_downloads"}}' |
+                grep -Poim1 '^content-location: \K.*' )"
+        url="${url::-1}" # remove \r
+        # get url
+        while [[ ! "${location}" ]]; do
+            sleep 2
+            location="$( api -w '%{redirect_url}' -o /dev/null "${url}" )"
+        done
+        # download
+        curl -fsSL -o po "${location}"
+    - name: upload
+      run: |
+        git diff --quiet -- po && exit
+        git add po
+        git -c user.name='bot' -c user.email='' commit -m 'sync po'
+        git push
