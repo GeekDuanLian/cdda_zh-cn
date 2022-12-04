@@ -27,10 +27,17 @@ jobs:
             location="$( api -w '%{redirect_url}' -o /dev/null "${url}" )"
         done
         # download
+        mv po po_old
         curl -fsSL -o po "${location}"
-    - name: upload
+    - name: check & upload
+      id: commit
       run: |
-        git diff --quiet -- po && exit
+        git diff --quiet -- po && exit # not changed
+        pip3 install polib; ./check.py po_old po; [[ -f fix.html ]] && { need_fix=', and need fix'; echo 'need_fix=1' >>"${GITHUB_OUTPUT}"; }
         git add po
-        git -c user.name='bot' -c user.email='' commit -m 'sync po'
+        git -c user.name='bot' -c user.email='' commit -m "sync po${need_fix}"
         git push
+    - if: ${{ steps.commit.outputs.need_fix }}
+      name: upload check result
+      uses: actions/upload-artifact@v3
+      with: { path: fix.html }
