@@ -40,4 +40,6 @@ jobs:
     - if: ${{ steps.commit.outputs.need_fix }}
       name: upload check result
       uses: actions/upload-artifact@v3
-      with: { path: fix.html }
+      with:
+        name: fix
+        path: fix.html
