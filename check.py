@@ -19,6 +19,7 @@ def check(s, mark=lambda x: f'<span style="color:red;background-color:yellow">{x
     for i in ',.;:?!)，。；：？！）\n':
         if i+' ' in s : r['多余空格']=''; s = s.replace(i+' ', i+mark('•'))
     if s.endswith(' '): r['多余空格']=''; s = s[:-1]+mark('•')
+    if s.startswith(' '): r['多余空格']=''; s = mark('•')+s[1:]
     if '\xa0' in s: r['非法空格']=''; s = s.replace('\xa0', mark(r'\xa0'))
     if '..' in s: r['英文省略号']=''; s = re.sub('([.]{2,})', mark(r'\1'), s)
     #if any([i in s for i in '‘’“”']): r['中文引号']=''; s = re.sub('([‘’“”])', mark(r'\1'), s)
