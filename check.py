@@ -16,13 +16,15 @@ f.write('<style>table, td { white-space: nowrap; vertical-align: top; border: 1p
 need_fix = False
 def check(s, mark=lambda x: f'<span>{x}</span>'):
     r = {}; s = s.replace('<', '&lt;')
-    for i in ',.;:?!()<>[]&，。；：？！（）《》【】\n':
+    for i in ',.;:?!()<>[]"&，。；：？！（）《》【】“”\n':
         if i+' ' in s : r['多余空格']=''; s = s.replace(i+' ', i+mark(' '))
         if ' '+i in s : r['多余空格']=''; s = s.replace(' '+i, mark(' ')+i)
-    if s.endswith(' '): r['多余空格']=''; s = s[:-1]+mark(' ')
+    if s.  endswith(' '): r['多余空格']=''; s = s[:-1]+mark(' ')
     if s.startswith(' '): r['多余空格']=''; s = mark(' ')+s[1:]
     if '\xa0' in s: r['非法空格']=''; s = s.replace('\xa0', mark(r'\xa0'))
     if '..' in s: r['英文省略号']=''; s = re.sub('([.]{2,})', mark(r'\1'), s)
+    if '.…' in s: r['混用省略号']=''; s = s.replace('.…', mark('.…'))
+    if '….' in s: r['混用省略号']=''; s = s.replace('….', mark('….'))
     #if any([i in s for i in '‘’“”']): r['中文引号']=''; s = re.sub('([‘’“”])', mark(r'\1'), s)
     if r:
         f.write('<tr><td>'+'<br>'.join(r.keys())+'</td><td><pre>'+s.replace('\n', '<br>')+'</pre></td></tr>')
