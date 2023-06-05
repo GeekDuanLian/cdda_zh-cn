@@ -19,7 +19,7 @@ jobs:
         api () { curl -fsS -m600 -H 'content-type: application/vnd.api+json' -H 'authorization: Bearer ${{ secrets.transifex_apikey }}' "${@}"; }
         # request
         url="$( api 'https://rest.api.transifex.com/resource_translations_async_downloads' --data-raw '{"data":{"attributes":{"content_encoding":"text","file_type":"default","mode":"default"},"relationships":{"language":{"data":{"id":"l:zh_CN","type":"languages"}},"resource":{"data":{"id":"o:cataclysm-dda-translators:p:cataclysm-dda:r:master-cataclysm-dda","type":"resources"}}},"type":"resource_translations_async_downloads"}}' |
-                jq -Mrc .data.links.self )"
+                jq -Mrc '.data.links.self' )"
         # get url
         while [[ ! "${location}" ]]; do
             (( timeout <= 600 )) || { echo 'timeout 600' >&2; exit 1; }
