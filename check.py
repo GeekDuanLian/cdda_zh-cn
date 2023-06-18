@@ -31,7 +31,7 @@ def check(s, mark=lambda x: f'<span>{x}</span>'):
     if s.  endswith(' '): r['多余空格']=''; s = s[:-1]+mark(' ')
     if s.startswith(' '): r['多余空格']=''; s = mark(' ')+s[1:]
     if '\xa0' in s: r['非法空格']=''; s = s.replace('\xa0', mark(r'\xa0'))
-    #if any([i in s for i in zhq]): r['中文引号']=''; s = re.sub(f'([{zhq}])', mark(r'\1'), s)
+    if any([i in s for i in zhq]): r['中文引号']=''; s = re.sub(f'([{zhq}])', mark(r'\1'), s)
     if r: f.write('<tr><td>'+'<br>'.join(r.keys())+'</td><td><pre>'+s.replace('\x00', '&lt;').replace('\n', '<br>')+'</pre></td></tr>'); global need_fix; need_fix = True
 
 for k, v in new.items():
