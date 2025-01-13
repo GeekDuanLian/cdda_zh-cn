@@ -39,7 +39,7 @@ jobs:
         git push
     - if: ${{ steps.commit.outputs.need_fix }}
       name: upload check result
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
-        name: fix
+        name: fix.html
         path: fix.html
